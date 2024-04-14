@@ -87,9 +87,8 @@ class PreNormLayer(torch.nn.Module):
 
 
 class BipartiteGraphConvolution(torch_geometric.nn.MessagePassing):
-    def __init__(self):
+    def __init__(self, emb_size=64):
         super().__init__("add")
-        emb_size = 64
 
         self.feature_module_left = torch.nn.Sequential(
             torch.nn.Linear(emb_size, emb_size)
@@ -163,8 +162,6 @@ class BaseModel(torch.nn.Module):
             return False
         except PreNormException:
             return True
-
-
 class GNNPolicyItem(BaseModel):
     def __init__(self):
         super().__init__()
@@ -194,8 +191,180 @@ class GNNPolicyItem(BaseModel):
             torch.nn.ReLU(),
         )
 
-        self.conv_v_to_c = BipartiteGraphConvolution()
-        self.conv_c_to_v = BipartiteGraphConvolution()
+        self.conv_v_to_c = BipartiteGraphConvolution(emb_size)
+        self.conv_c_to_v = BipartiteGraphConvolution(emb_size)
+
+        self.output_module = torch.nn.Sequential(
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, 1, bias=False),
+        )
+
+    def forward(
+        self, constraint_features, edge_indices, edge_features, variable_features
+    ):
+        reversed_edge_indices = torch.stack([edge_indices[1], edge_indices[0]], dim=0)
+
+        constraint_features = self.cons_embedding(constraint_features)
+        edge_features = self.edge_embedding(edge_features)
+        variable_features = self.var_embedding(variable_features)
+
+        constraint_features = self.conv_v_to_c(
+            variable_features, reversed_edge_indices, edge_features, constraint_features
+        )
+        variable_features = self.conv_c_to_v(
+            constraint_features, edge_indices, edge_features, variable_features
+        )
+
+        output = self.output_module(variable_features).squeeze(-1)
+        return output
+
+
+class GNNPolicyBase64(BaseModel):
+    def __init__(self):
+        super().__init__()
+        emb_size = 64
+        cons_nfeats = 5
+        edge_nfeats = 1
+        var_nfeats = 17
+
+        # CONSTRAINT EMBEDDING
+        self.cons_embedding = torch.nn.Sequential(
+            PreNormLayer(cons_nfeats),
+            torch.nn.Linear(cons_nfeats, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+        )
+
+        # EDGE EMBEDDING
+        self.edge_embedding = torch.nn.Sequential(PreNormLayer(edge_nfeats),)
+
+        # VARIABLE EMBEDDING
+        self.var_embedding = torch.nn.Sequential(
+            PreNormLayer(var_nfeats),
+            torch.nn.Linear(var_nfeats, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+        )
+
+        self.conv_v_to_c = BipartiteGraphConvolution(emb_size)
+        self.conv_c_to_v = BipartiteGraphConvolution(emb_size)
+
+        self.output_module = torch.nn.Sequential(
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, 1, bias=False),
+        )
+
+    def forward(
+        self, constraint_features, edge_indices, edge_features, variable_features
+    ):
+        reversed_edge_indices = torch.stack([edge_indices[1], edge_indices[0]], dim=0)
+
+        constraint_features = self.cons_embedding(constraint_features)
+        edge_features = self.edge_embedding(edge_features)
+        variable_features = self.var_embedding(variable_features)
+
+        constraint_features = self.conv_v_to_c(
+            variable_features, reversed_edge_indices, edge_features, constraint_features
+        )
+        variable_features = self.conv_c_to_v(
+            constraint_features, edge_indices, edge_features, variable_features
+        )
+
+        output = self.output_module(variable_features).squeeze(-1)
+        return output
+
+class GNNPolicyBase128(BaseModel):
+    def __init__(self):
+        super().__init__()
+        emb_size = 128
+        cons_nfeats = 5
+        edge_nfeats = 1
+        var_nfeats = 17
+
+        # CONSTRAINT EMBEDDING
+        self.cons_embedding = torch.nn.Sequential(
+            PreNormLayer(cons_nfeats),
+            torch.nn.Linear(cons_nfeats, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+        )
+
+        # EDGE EMBEDDING
+        self.edge_embedding = torch.nn.Sequential(PreNormLayer(edge_nfeats),)
+
+        # VARIABLE EMBEDDING
+        self.var_embedding = torch.nn.Sequential(
+            PreNormLayer(var_nfeats),
+            torch.nn.Linear(var_nfeats, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+        )
+
+        self.conv_v_to_c = BipartiteGraphConvolution(emb_size)
+        self.conv_c_to_v = BipartiteGraphConvolution(emb_size)
+
+        self.output_module = torch.nn.Sequential(
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, 1, bias=False),
+        )
+
+    def forward(
+        self, constraint_features, edge_indices, edge_features, variable_features
+    ):
+        reversed_edge_indices = torch.stack([edge_indices[1], edge_indices[0]], dim=0)
+
+        constraint_features = self.cons_embedding(constraint_features)
+        edge_features = self.edge_embedding(edge_features)
+        variable_features = self.var_embedding(variable_features)
+
+        constraint_features = self.conv_v_to_c(
+            variable_features, reversed_edge_indices, edge_features, constraint_features
+        )
+        variable_features = self.conv_c_to_v(
+            constraint_features, edge_indices, edge_features, variable_features
+        )
+
+        output = self.output_module(variable_features).squeeze(-1)
+        return output
+
+class GNNPolicyBase256(BaseModel):
+    def __init__(self):
+        super().__init__()
+        emb_size = 256
+        cons_nfeats = 5
+        edge_nfeats = 1
+        var_nfeats = 17
+
+        # CONSTRAINT EMBEDDING
+        self.cons_embedding = torch.nn.Sequential(
+            PreNormLayer(cons_nfeats),
+            torch.nn.Linear(cons_nfeats, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+        )
+
+        # EDGE EMBEDDING
+        self.edge_embedding = torch.nn.Sequential(PreNormLayer(edge_nfeats),)
+
+        # VARIABLE EMBEDDING
+        self.var_embedding = torch.nn.Sequential(
+            PreNormLayer(var_nfeats),
+            torch.nn.Linear(var_nfeats, emb_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(emb_size, emb_size),
+            torch.nn.ReLU(),
+        )
+
+        self.conv_v_to_c = BipartiteGraphConvolution(emb_size)
+        self.conv_c_to_v = BipartiteGraphConvolution(emb_size)
 
         self.output_module = torch.nn.Sequential(
             torch.nn.Linear(emb_size, emb_size),
@@ -305,8 +474,8 @@ class GNNPolicyAno(BaseModel):
             torch.nn.ReLU(),
         )
 
-        self.conv_v_to_c = BipartiteGraphConvolutionDropout()
-        self.conv_c_to_v = BipartiteGraphConvolutionDropout()
+        self.conv_v_to_c = BipartiteGraphConvolutionDropout(emb_size)
+        self.conv_c_to_v = BipartiteGraphConvolutionDropout(emb_size)
 
         self.output_module = torch.nn.Sequential(
             torch.nn.Linear(emb_size, emb_size),
@@ -364,8 +533,8 @@ class GNNPolicyLoad(BaseModel):
             torch.nn.ReLU(),
         )
 
-        self.conv_v_to_c = BipartiteGraphConvolution()
-        self.conv_c_to_v = BipartiteGraphConvolution()
+        self.conv_v_to_c = BipartiteGraphConvolution(emb_size)
+        self.conv_c_to_v = BipartiteGraphConvolution(emb_size)
 
         self.output_module = torch.nn.Sequential(
             torch.nn.Linear(emb_size, emb_size),
