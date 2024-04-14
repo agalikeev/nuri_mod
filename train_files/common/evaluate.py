@@ -44,12 +44,12 @@ if __name__ == "__main__":
     parser.add_argument("--end", type=int, default=-1, help="end")
     parser.add_argument("--exp_name", type=str, default="", help="end")
     parser.add_argument(
-        "task", help="Task to evaluate.", choices=["primal", "dual", "config"],
+        "--task", help="Task to evaluate.", choices=["primal", "dual", "config"],
     )
     parser.add_argument(
-        "problem",
+        "--problem",
         help="Problem benchmark to process.",
-        choices=["item_placement", "load_balancing", "anonymous"],
+        choices=["item_placement", "load_balancing", "anonymous", "miplib"],
     )
     parser.add_argument(
         "-t",
@@ -69,6 +69,8 @@ if __name__ == "__main__":
         type=str,
         choices=("valid", "test", "train"),
     )
+    parser.add_argument("--class_num", type=str, default='class1', help="start")
+    
     args = parser.parse_args()
 
     print(f"Evaluating the {args.task} task agent.")
@@ -102,6 +104,12 @@ if __name__ == "__main__":
         results_file = pathlib.Path(
             f"results/{args.task}/3_anonymous{args.exp_name}{args.start}_{args.end}.csv"
         )
+    elif args.problem == "miplib":
+        instances_path = pathlib.Path(f"/content/ml4co/baseline/dual/train_files/dataset/class1")
+        results_file = pathlib.Path(
+            f"/content/gdrive/MyDrive/DAgger/eval/class1.csv"
+        )
+      
 
     print(f"Processing instances from {instances_path.resolve()}")
     instance_files = list(instances_path.glob("*.mps.gz"))[args.start : args.end]
@@ -152,7 +160,7 @@ if __name__ == "__main__":
     # override from command-line argument if provided
     time_limit = getattr(args, "timelimit", time_limit)
 
-    policy = Policy(problem=args.problem)
+    policy = Policy(problem=args.problem, class_num = args.class_num)
     observation_function = ObservationFunction(problem=args.problem)
 
     integral_function = BoundIntegral()
