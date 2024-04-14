@@ -4,7 +4,7 @@ import ecole as ec
 import numpy as np
 import collections
 import random
-from agents.agent_model import GNNPolicyItem, GNNPolicyLoad, GNNPolicyAno
+from agents.agent_model import GNNPolicyItem, GNNPolicyLoad, GNNPolicyAno, GNNPolicyBase64, GNNPolicyBase128, GNNPolicyBase256 
 
 
 class ObservationFunction(ec.observation.NodeBipartite):
@@ -18,10 +18,10 @@ class ObservationFunction(ec.observation.NodeBipartite):
 
 class Policy():
 
-    def __init__(self, problem):
+    def __init__(self, problem, class_num):
         self.rng = np.random.RandomState()
 
-        self.device = f"cuda:0"
+        self.device = f"cpu"
         self.problem = problem
         
         if problem == 'item_placement':
@@ -33,6 +33,9 @@ class Policy():
         elif problem == 'anonymous':
             params_path = 'ano.pkl' 
             self.policy = GNNPolicyAno().to(self.device)
+        elif problem == 'miplib':
+            params_path = f'/content/gdrive/MyDrive/DAgger/classification/policy{class_num}/best_params.pkl'
+            self.policy = GNNPolicyBase128().to(self.device)
         else:
             params_path = 'item.pkl'
             self.policy = GNNPolicyItem().to(self.device)
@@ -54,10 +57,8 @@ class Policy():
                 fed_state_dict[key]=key_sum/len(models)
             self.policy.load_state_dict(fed_state_dict)
             self.policy.eval()
-        elif problem == 'load_balancing':
-            continue
         else:
-            self.policy.load_state_dict(torch.load(params_path))
+            self.policy.load_state_dict(torch.load(params_path, map_location=torch.device('cpu')))
             self.policy.eval()
 
     def seed(self, seed):
