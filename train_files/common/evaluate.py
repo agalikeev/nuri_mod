@@ -181,12 +181,12 @@ if __name__ == "__main__":
         env.seed(seed)
 
         # read the instance's initial primal and dual bounds from JSON file
-        with open(instance.with_name(instance.stem).with_suffix(".json")) as f:
-            instance_info = json.load(f)
+        #with open(instance.with_name(instance.stem).with_suffix(".json")) as f:
+        #    instance_info = json.load(f)
 
         # set up the reward function parameters for that instance
-        initial_primal_bound = instance_info["primal_bound"]
-        initial_dual_bound = instance_info["dual_bound"]
+        initial_primal_bound = None
+        initial_dual_bound = None
         objective_offset = 0
 
         integral_function.set_parameters(
