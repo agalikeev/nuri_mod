@@ -234,7 +234,7 @@ if __name__ == "__main__":
         print(f"  cumulated reward (to be maximized): {cumulated_reward}")
         print(time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime()))
 
-        np.save(f"/data/load_random_{instance_count}.npy", cumulated_rewards)
+        np.save(f"/content/gdrive/MyDrive/DAgger/eval/load_random_{instance_count}.npy", cumulated_rewards)
         # print(step_count)
         # save instance results
         with open(results_file, mode="a") as csv_file:
