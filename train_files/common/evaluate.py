@@ -70,6 +70,7 @@ if __name__ == "__main__":
         choices=("valid", "test", "train"),
     )
     parser.add_argument("--class_num", type=str, default='class1', help="start")
+    parser.add_argument("--tasks", type=str, default='class1', help="start")
     
     args = parser.parse_args()
 
@@ -105,9 +106,9 @@ if __name__ == "__main__":
             f"results/{args.task}/3_anonymous{args.exp_name}{args.start}_{args.end}.csv"
         )
     elif args.problem == "miplib":
-        instances_path = pathlib.Path(f"/content/ml4co/baseline/dual/train_files/dataset/class1")
+        instances_path = pathlib.Path(f"/content/ml4co/baseline/dual/train_files/dataset/{args.tasks}")
         results_file = pathlib.Path(
-            f"/content/gdrive/MyDrive/DAgger/eval/class1.csv"
+            f"/content/gdrive/MyDrive/DAgger/eval/policy{args.class_num}_{args.tasks}.csv"
         )
       
 
@@ -234,7 +235,7 @@ if __name__ == "__main__":
         print(f"  cumulated reward (to be maximized): {cumulated_reward}")
         print(time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime()))
 
-        np.save(f"/content/gdrive/MyDrive/DAgger/eval/load_random_{instance_count}.npy", cumulated_rewards)
+        np.save(f"/content/gdrive/MyDrive/DAgger/eval/policy{args.class_num}_{args.tasks}_load_random_{instance_count}.npy", cumulated_rewards)
         # print(step_count)
         # save instance results
         with open(results_file, mode="a") as csv_file:
