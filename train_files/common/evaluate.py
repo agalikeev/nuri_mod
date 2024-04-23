@@ -1,6 +1,7 @@
 import argparse
 import csv
 import json
+from os import mkdir
 import pathlib
 import time
 
@@ -107,10 +108,11 @@ if __name__ == "__main__":
         )
     elif args.problem == "miplib":
         instances_path = pathlib.Path(f"/content/ml4co/baseline/dual/train_files/dataset/{args.tasks}")
+        mkdir(f"/content/gdrive/MyDrive/DAgger/eval/all_tasks_dagger_policy{args.class_num}0")
         results_file = pathlib.Path(
-            f"/content/gdrive/MyDrive/DAgger/eval/policy{args.class_num}_{args.tasks}.csv"
+            f"/content/gdrive/MyDrive/DAgger/eval/all_tasks_dagger_policy{args.class_num}0_{args.tasks}.csv"
         )
-      
+    
 
     print(f"Processing instances from {instances_path.resolve()}")
     instance_files = list(instances_path.glob("*.mps.gz"))[args.start : args.end]
